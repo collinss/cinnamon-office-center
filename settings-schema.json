@@ -1,0 +1,78 @@
+{
+    "general": {
+        "type": "header",
+        "description": "General Settings"
+    },
+    
+    "panelIcon": {
+        "type": "iconfilechooser",
+        "description": "Panel Icon",
+        "default": "libreoffice-startcenter"
+    },
+    
+    "panelText": {
+        "type": "entry",
+        "description": "Panel Text",
+        "default": ""
+    },
+    
+    "iconSize": {
+        "type": "spinbutton",
+        "default": 20,
+        "min": 10,
+        "max": 50,
+        "units": "px",
+        "step": 2,
+        "description": "Icon Size"
+    },
+    
+    "documents": {
+        "type": "header",
+        "description": "Documents"
+    },
+    
+    "showDocuments": {
+        "type": "checkbox",
+        "description": "Show Documents Section",
+        "default": true
+    },
+    
+    "recurseDocuments": {
+        "type": "checkbox",
+        "description": "Show contents of subfolders",
+        "default": true,
+        "indent": true,
+        "dependency": "showDocuments"
+    },
+    
+    "recent": {
+        "type": "header",
+        "description": "Recent Documents"
+    },
+    
+    "showRecentDocuments": {
+        "type": "checkbox",
+        "description": "Show Recent Documents Section",
+        "default": false
+    },
+    
+    "popoutRecentDocuments": {
+        "type": "checkbox",
+        "description": "Show as pop-out menu",
+        "default": false,
+        "indent": true,
+        "dependency": "showRecentDocuments"
+    },
+    
+    "recentSizeLimit": {
+        "type": "spinbutton",
+        "default": 10,
+        "min": 0,
+        "max": 30,
+        "units": "",
+        "step": 1,
+        "description": "Number to show",
+        "indent": true,
+        "dependency": "showRecentDocuments"
+    }
+}
