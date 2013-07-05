@@ -56,14 +56,6 @@
         "default": false
     },
     
-    "popoutRecentDocuments": {
-        "type": "checkbox",
-        "description": "Show as pop-out menu",
-        "default": false,
-        "indent": true,
-        "dependency": "showRecentDocuments"
-    },
-    
     "recentSizeLimit": {
         "type": "spinbutton",
         "default": 10,
