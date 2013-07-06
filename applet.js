@@ -368,19 +368,18 @@ MyApplet.prototype = {
     
     _get_documents: function(dir) {
         
-        let documents = [];
+        var documents = [];
         let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
         while ( (info = gEnum.next_file(null)) != null ) {
             if ( info.get_is_hidden() ) continue;
             if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
                 let childDir = dir.get_child(info.get_name());
-                documents.concat(this._get_documents(childDir));
+                documents = documents.concat(this._get_documents(childDir));
             }
             else documents.push(dir.get_child(info.get_name()));
         }
-        
         return documents;
-    
+        
     },
     
     _build_recent_documents_section: function() {
