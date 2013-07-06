@@ -205,7 +205,8 @@ MyApplet.prototype = {
             
             this.menuManager = new PopupMenu.PopupMenuManager(this);
             this.appSys = Cinnamon.AppSystem.get_default();
-            let dirMonitor = Gio.file_new_for_path(GLib.get_home_dir() + "/Documents/").monitor_directory(Gio.FileMonitorFlags.SEND_MOVED, null);
+            let dirMonitor = Gio.file_new_for_path(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS))
+                                .monitor_directory(Gio.FileMonitorFlags.SEND_MOVED, null);
             this.recentManager = new Gtk.RecentManager();
             
             //listen for changes
@@ -352,7 +353,7 @@ MyApplet.prototype = {
         
         this.documentSection.removeAll();
         
-        let dir = Gio.file_new_for_path(GLib.get_home_dir() + "/Documents/");
+        let dir = Gio.file_new_for_path(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS));
         let documents = this._get_documents(dir);
         for ( let i = 0; i < documents.length; i++ ) {
             let document = documents[i];
