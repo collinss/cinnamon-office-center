@@ -237,6 +237,7 @@ MyApplet.prototype = {
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelText", "panelText", this._set_panel_text);
         this.settings.bindProperty(Settings.BindingDirection.IN, "iconSize", "iconSize", this.build_menu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showDocuments", "showDocuments", this.build_menu);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "altDir", "altDir", this._build_documents_section);
         this.settings.bindProperty(Settings.BindingDirection.IN, "recurseDocuments", "recurseDocuments", this._build_documents_section);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showRecentDocuments", "showRecentDocuments", this.build_menu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "recentSizeLimit", "recentSizeLimit", this._build_recent_documents_section);
@@ -353,7 +354,9 @@ MyApplet.prototype = {
         
         this.documentSection.removeAll();
         
-        let dir = Gio.file_new_for_path(GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS));
+        if ( this.altDir == "" ) path = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS);
+        else path = this.altDir;
+        let dir = Gio.file_new_for_path(path);
         let documents = this._get_documents(dir);
         for ( let i = 0; i < documents.length; i++ ) {
             let document = documents[i];

@@ -45,6 +45,15 @@
         "dependency": "showDocuments"
     },
     
+    "altDir": {
+        "type": "filechooser",
+        "description": "Alternate directory",
+        "default": "",
+        "select-dir": true,
+        "indent": true,
+        "dependency": "showDocuments"
+    },
+    
     "recent": {
         "type": "header",
         "description": "Recent Documents"
