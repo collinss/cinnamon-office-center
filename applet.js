@@ -31,7 +31,7 @@ MenuItem.prototype = {
         try{
             
             PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
-            this.addActor(icon);
+            if ( icon != null ) this.addActor(icon);
             
             if ( title.length > MENU_ITEM_TEXT_LENGTH ) title = title.slice(0,MENU_ITEM_TEXT_LENGTH-3) + "...";
             let label = new St.Label({ text: title });
@@ -368,7 +368,7 @@ MyApplet.prototype = {
     
     _get_documents: function(dir) {
         
-        var documents = [];
+        let documents = [];
         let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
         while ( (info = gEnum.next_file(null)) != null ) {
             if ( info.get_is_hidden() ) continue;
