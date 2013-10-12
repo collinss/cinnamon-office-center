@@ -7,12 +7,18 @@
     "panelIcon": {
         "type": "iconfilechooser",
         "description": "Panel Icon",
-        "default": "libreoffice-startcenter"
+        "default": "applications-office"
     },
     
     "panelText": {
         "type": "entry",
         "description": "Panel Text",
+        "default": ""
+    },
+    
+    "keyOpen": {
+        "type": "keybinding",
+        "description": "Menu shorcut key",
         "default": ""
     },
     
