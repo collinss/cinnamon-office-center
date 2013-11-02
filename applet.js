@@ -295,8 +295,19 @@ MyApplet.prototype = {
                 
                 let documentPane = new PopupMenu.PopupMenuSection();
                 mainBox.add_actor(documentPane.actor, { span: 1 });
-                let title = new PopupMenu.PopupMenuItem(_("DOCUMENTS") , { reactive: false });
+                let title = new PopupMenu.PopupBaseMenuItem({ reactive: false });
+                title.addActor(new St.Label({ text: _("DOCUMENTS") }));
                 documentPane.addMenuItem(title);
+                
+                //add link to documents folder
+                let linkButton = new St.Button();
+                title.addActor(linkButton);
+                let file = Gio.file_new_for_path(this.metadata.path + "/link-symbolic.svg");
+                let gicon = new Gio.FileIcon({ file: file });
+                let image = new St.Icon({ gicon: gicon, icon_size: 16, icon_type: St.IconType.SYMBOLIC });
+                linkButton.add_actor(image);
+                linkButton.connect("clicked", Lang.bind(this, this.openDocumentsFolder));
+                new Tooltips.Tooltip(linkButton, _("Open folder"));
                 
                 let documentScrollBox = new St.ScrollView({ x_fill: true, y_fill: false, y_align: St.Align.START });
                 documentPane.actor.add_actor(documentScrollBox);
@@ -381,9 +392,9 @@ MyApplet.prototype = {
         
         this.documentSection.removeAll();
         
-        if ( this.altDir == "" ) path = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS);
-        else path = this.altDir;
-        let dir = Gio.file_new_for_path(path);
+        if ( this.altDir == "" ) this.documentPath = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS);
+        else this.documentPath = this.altDir;
+        let dir = Gio.file_new_for_path(this.documentPath);
         let documents = this._get_documents(dir);
         for ( let i = 0; i < documents.length; i++ ) {
             let document = documents[i];
@@ -425,6 +436,11 @@ MyApplet.prototype = {
             this.recentSection.addMenuItem(recentItem);
         }
         
+    },
+    
+    openDocumentsFolder: function() {
+        this.menu.close();
+        Gio.app_info_launch_default_for_uri("file://" + this.documentPath, global.create_app_launch_context());
     },
     
     _set_panel_icon: function() {
