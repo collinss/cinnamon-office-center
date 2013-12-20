@@ -371,7 +371,7 @@ MyApplet.prototype = {
             if ( nextType == GMenu.TreeItemType.DIRECTORY ) {
                 let dir = iter.get_directory();
                 if ( dir.get_menu_id() == _("Office") ) {
-                    dirIter = dir.iter();
+                    let dirIter = dir.iter();
                     while (( nextType = dirIter.next()) != GMenu.TreeItemType.INVALID ) {
                         if ( nextType == GMenu.TreeItemType.ENTRY ) {
                             let entry = dirIter.get_entry();
@@ -408,6 +408,8 @@ MyApplet.prototype = {
         
         let documents = [];
         let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
+        
+        let info;
         while ( (info = gEnum.next_file(null)) != null ) {
             if ( info.get_is_hidden() ) continue;
             if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
