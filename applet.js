@@ -304,7 +304,7 @@ MyApplet.prototype = {
                 title.addActor(linkButton);
                 let file = Gio.file_new_for_path(this.metadata.path + "/link-symbolic.svg");
                 let gicon = new Gio.FileIcon({ file: file });
-                let image = new St.Icon({ gicon: gicon, icon_size: 16, icon_type: St.IconType.SYMBOLIC });
+                let image = new St.Icon({ gicon: gicon, icon_size: 10, icon_type: St.IconType.SYMBOLIC });
                 linkButton.add_actor(image);
                 linkButton.connect("clicked", Lang.bind(this, this.openDocumentsFolder));
                 new Tooltips.Tooltip(linkButton, _("Open folder"));
