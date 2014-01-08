@@ -424,6 +424,7 @@ MyApplet.prototype = {
     
     _build_recent_documents_section: function() {
         
+        if ( !this.showRecentDocuments ) return;
         this.recentSection.removeAll();
         
         let recentDocuments = this.recentManager.get_items();
