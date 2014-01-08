@@ -408,6 +408,7 @@ MyApplet.prototype = {
         
         let documents = [];
         let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
+        
         let info;
         while ( (info = gEnum.next_file(null)) != null ) {
             if ( info.get_is_hidden() ) continue;
