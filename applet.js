@@ -304,7 +304,7 @@ MyApplet.prototype = {
                 title.addActor(linkButton);
                 let file = Gio.file_new_for_path(this.metadata.path + "/link-symbolic.svg");
                 let gicon = new Gio.FileIcon({ file: file });
-                let image = new St.Icon({ gicon: gicon, icon_size: 16, icon_type: St.IconType.SYMBOLIC });
+                let image = new St.Icon({ gicon: gicon, icon_size: 10, icon_type: St.IconType.SYMBOLIC });
                 linkButton.add_actor(image);
                 linkButton.connect("clicked", Lang.bind(this, this.openDocumentsFolder));
                 new Tooltips.Tooltip(linkButton, _("Open folder"));
@@ -371,7 +371,7 @@ MyApplet.prototype = {
             if ( nextType == GMenu.TreeItemType.DIRECTORY ) {
                 let dir = iter.get_directory();
                 if ( dir.get_menu_id() == _("Office") ) {
-                    dirIter = dir.iter();
+                    let dirIter = dir.iter();
                     while (( nextType = dirIter.next()) != GMenu.TreeItemType.INVALID ) {
                         if ( nextType == GMenu.TreeItemType.ENTRY ) {
                             let entry = dirIter.get_entry();
@@ -408,6 +408,7 @@ MyApplet.prototype = {
         
         let documents = [];
         let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
+        let info;
         while ( (info = gEnum.next_file(null)) != null ) {
             if ( info.get_is_hidden() ) continue;
             if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
@@ -422,6 +423,7 @@ MyApplet.prototype = {
     
     _build_recent_documents_section: function() {
         
+        if ( !this.recentSection ) return;
         this.recentSection.removeAll();
         
         let recentDocuments = this.recentManager.get_items();
