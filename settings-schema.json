@@ -10,6 +10,12 @@
         "default": "applications-office"
     },
     
+    "symbolicPanelIcon": {
+        "type": "checkbox",
+        "description": "Symbolic",
+        "default": false
+    },
+    
     "panelText": {
         "type": "entry",
         "description": "Panel Text",
