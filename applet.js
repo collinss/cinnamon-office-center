@@ -17,7 +17,6 @@ const Util = imports.misc.util;
 const Lang = imports.lang;
 
 const MENU_ITEM_TEXT_LENGTH = 25;
-const MENU_PADDING_WIDTH = 25;
 
 let menu_item_icon_size;
 
@@ -401,36 +400,36 @@ MyApplet.prototype = {
             this.menuManager.addMenu(this.menu);
             let section = new PopupMenu.PopupMenuSection();
             this.menu.addMenuItem(section);
-            let mainBox = new St.BoxLayout({ style_class: 'menu-applications-box', vertical: false });
+            let mainBox = new St.BoxLayout({ style_class: "xCenter-mainBox", vertical: false });
             section.actor.add_actor(mainBox);
             
             //launchers section
+            let launchersPaneBox = new St.BoxLayout({ style_class: "xCenter-pane" });
+            mainBox.add_actor(launchersPaneBox);
             let launchersPane = new PopupMenu.PopupMenuSection();
-            let title = new PopupMenu.PopupMenuItem(_("LAUNCHERS") , { reactive: false });
-            launchersPane.addMenuItem(title);
+            launchersPaneBox.add_actor(launchersPane.actor);
             
+            let launchersTitle = new PopupMenu.PopupMenuItem(_("LAUNCHERS") , { style_class: "xCenter-title", reactive: false });
+            launchersPane.addMenuItem(launchersTitle);
             this.launchersSection = new PopupMenu.PopupMenuSection();
             launchersPane.addMenuItem(this.launchersSection);
             
-            mainBox.add_actor(launchersPane.actor, { span: 1 });
             this.buildLaunchersSection();
-            
-            let paddingBox = new St.BoxLayout();
-            paddingBox.set_width(MENU_PADDING_WIDTH);
-            mainBox.add_actor(paddingBox);
             
             //documents section
             if ( this.showDocuments ) {
-                
+                let documentPaneBox = new St.BoxLayout({ style_class: "xCenter-pane" });
+                mainBox.add_actor(documentPaneBox);
                 let documentPane = new PopupMenu.PopupMenuSection();
-                mainBox.add_actor(documentPane.actor, { span: 1 });
-                let title = new PopupMenu.PopupBaseMenuItem({ reactive: false });
-                title.addActor(new St.Label({ text: _("DOCUMENTS") }));
-                documentPane.addMenuItem(title);
+                documentPaneBox.add_actor(documentPane.actor);
+                
+                let documentTitle = new PopupMenu.PopupBaseMenuItem({ style_class: "xCenter-title", reactive: false });
+                documentTitle.addActor(new St.Label({ text: _("DOCUMENTS") }));
+                documentPane.addMenuItem(documentTitle);
                 
                 //add link to documents folder
                 let linkButton = new St.Button();
-                title.addActor(linkButton);
+                documentTitle.addActor(linkButton);
                 let file = Gio.file_new_for_path(this.metadata.path + "/link-symbolic.svg");
                 let gicon = new Gio.FileIcon({ file: file });
                 let image = new St.Icon({ gicon: gicon, icon_size: 10, icon_type: St.IconType.SYMBOLIC });
@@ -438,39 +437,35 @@ MyApplet.prototype = {
                 linkButton.connect("clicked", Lang.bind(this, this.openDocumentsFolder));
                 new Tooltips.Tooltip(linkButton, _("Open folder"));
                 
-                let documentScrollBox = new St.ScrollView({ x_fill: true, y_fill: false, y_align: St.Align.START });
+                let documentScrollBox = new St.ScrollView({ style_class: "xCenter-scrollBox", x_fill: true, y_fill: false, y_align: St.Align.START });
                 documentPane.actor.add_actor(documentScrollBox);
                 documentScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
                 let vscroll = documentScrollBox.get_vscroll_bar();
-                vscroll.connect('scroll-start', Lang.bind(this, function() { this.menu.passEvents = true; }));
-                vscroll.connect('scroll-stop', Lang.bind(this, function() { this.menu.passEvents = false; }));
+                vscroll.connect("scroll-start", Lang.bind(this, function() { this.menu.passEvents = true; }));
+                vscroll.connect("scroll-stop", Lang.bind(this, function() { this.menu.passEvents = false; }));
                 
                 this.documentSection = new PopupMenu.PopupMenuSection();
                 documentScrollBox.add_actor(this.documentSection.actor);
                 
                 this.buildDocumentsSection();
-                
-                let paddingBox = new St.BoxLayout();
-                paddingBox.set_width(MENU_PADDING_WIDTH);
-                mainBox.add_actor(paddingBox);
-                
             }
             
             //recent documents section
             if ( this.showRecentDocuments ) {
-                
+                let recentPaneBox = new St.BoxLayout({ style_class: "xCenter-pane" });
+                mainBox.add_actor(recentPaneBox);
                 let recentPane = new PopupMenu.PopupMenuSection();
-                mainBox.add_actor(recentPane.actor, { span: 1 });
+                recentPaneBox.add_actor(recentPane.actor);
                 
-                let title = new PopupMenu.PopupMenuItem(_("RECENT DOCUMENTS"), { reactive: false });
-                recentPane.addMenuItem(title);
+                let recentTitle = new PopupMenu.PopupMenuItem(_("RECENT DOCUMENTS"), { style_class: "xCenter-title", reactive: false });
+                recentPane.addMenuItem(recentTitle);
                 
-                let recentScrollBox = new St.ScrollView({ x_fill: true, y_fill: false, y_align: St.Align.START });
+                let recentScrollBox = new St.ScrollView({ style_class: "xCenter-scrollBox", x_fill: true, y_fill: false, y_align: St.Align.START });
                 recentPane.actor.add_actor(recentScrollBox);
                 recentScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
                 let vscroll = recentScrollBox.get_vscroll_bar();
-                vscroll.connect('scroll-start', Lang.bind(this, function() { this.menu.passEvents = true; }));
-                vscroll.connect('scroll-stop', Lang.bind(this, function() { this.menu.passEvents = false; }));
+                vscroll.connect("scroll-start", Lang.bind(this, function() { this.menu.passEvents = true; }));
+                vscroll.connect("scroll-stop", Lang.bind(this, function() { this.menu.passEvents = false; }));
                 
                 this.recentSection = new PopupMenu.PopupMenuSection();
                 recentScrollBox.add_actor(this.recentSection.actor);
@@ -479,7 +474,6 @@ MyApplet.prototype = {
                 recentPane.addMenuItem(clearRecent);
                 
                 this.buildRecentDocumentsSection();
-                
             }
             
         } catch(e) {
@@ -603,9 +597,9 @@ MyApplet.prototype = {
             if (this._scaleMode) {
                 let height = (this._panelHeight / DEFAULT_PANEL_HEIGHT) * PANEL_SYMBOLIC_ICON_DEFAULT_HEIGHT;
                 this._applet_icon = new St.Icon({gicon: gicon, icon_size: height,
-                                                icon_type: St.IconType.SYMBOLIC, reactive: true, track_hover: true, style_class: 'applet-icon' });
+                                                icon_type: St.IconType.SYMBOLIC, reactive: true, track_hover: true, style_class: "applet-icon" });
             } else {
-                this._applet_icon = new St.Icon({gicon: gicon, icon_size: 22, icon_type: St.IconType.FULLCOLOR, reactive: true, track_hover: true, style_class: 'applet-icon' });
+                this._applet_icon = new St.Icon({gicon: gicon, icon_size: 22, icon_type: St.IconType.FULLCOLOR, reactive: true, track_hover: true, style_class: "applet-icon" });
             }
             this._applet_icon_box.child = this._applet_icon;
         }
