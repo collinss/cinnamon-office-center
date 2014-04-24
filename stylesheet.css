@@ -1,0 +1,49 @@
+.xCenter-mainBox {
+    spacing: 25px;
+}
+
+.xCenter-title {
+    
+}
+
+.xCenter-pane {
+    
+}
+
+.about-content {
+    width: 550px;
+    height: 250px;
+}
+
+.about-title {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.about-uuid {
+    font-size: .8em;
+}
+
+.about-icon {
+    padding-right: 20px;
+}
+
+.about-scrollBox {
+    padding-top: 1.2em;
+}
+
+.about-scrollBox-innerBox {
+    spacing: 1.2em;
+}
+
+.about-description {
+    padding-top: 4px;
+}
+
+.about-version {
+    padding-left: 7px;
+}
+
+#about-website {
+    
+}
