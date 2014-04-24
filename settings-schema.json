@@ -7,13 +7,8 @@
     "panelIcon": {
         "type": "iconfilechooser",
         "description": "Panel Icon",
-        "default": "applications-office"
-    },
-    
-    "symbolicPanelIcon": {
-        "type": "checkbox",
-        "description": "Symbolic",
-        "default": false
+        "default": "applications-office",
+        "tooltip": "Accepts icon name or direct path (supports symbolic icons)"
     },
     
     "panelText": {
