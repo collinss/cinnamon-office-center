@@ -79,7 +79,7 @@ AboutDialog.prototype = {
             let dText = desc.clutter_text;
             topTextBox.add_actor(desc);
             
-            /*description and comments*/
+            /*optional content*/
             let scrollBox = new St.ScrollView({ style_class: "about-scrollBox" });
             contentBox.add_actor(scrollBox);
             let infoBox = new St.BoxLayout({ vertical: true, style_class: "about-scrollBox-innerBox" });
@@ -151,20 +151,21 @@ MenuItem.prototype = {
     __proto__: PopupMenu.PopupBaseMenuItem.prototype,
     
     _init: function(title, icon, params){
-        try{
+        try {
             
             PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+            this.actor.add_style_class_name("xCenter-menuItem");
             if ( icon != null ) this.addActor(icon);
             
-            if ( title.length > MENU_ITEM_TEXT_LENGTH ) {
-                let tooltip = new Tooltips.Tooltip(this.actor, title);
-                title = title.slice(0,MENU_ITEM_TEXT_LENGTH-3) + "...";
-            }
-            let label = new St.Label({ text: title });
+            let label = new St.Label({ style_class: "xCenter-menuItemLabel", text: title });
             this.addActor(label);
+            label.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+            
             this.actor._delegate = this;
             
-        } catch (e){
+            let tooltip = new Tooltips.Tooltip(this.actor, title);
+            
+        } catch (e) {
             global.logError(e);
         }
     }
@@ -365,7 +366,7 @@ MyApplet.prototype = {
     },
     
     openMenu: function(){
-        this.menu.open();
+        this.menu.toggle();
     },
     
     bindSettings: function() {
