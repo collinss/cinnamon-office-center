@@ -11,7 +11,6 @@ const PopupMenu = imports.ui.popupMenu;
 const Settings = imports.ui.settings;
 const Tooltips = imports.ui.tooltips;
 
-const Util = imports.misc.util;
 const Lang = imports.lang;
 
 const UUID = "officeCenter@scollins"
@@ -203,7 +202,7 @@ MyApplet.prototype = {
             Applet.TextIconApplet.prototype._init.call(this, this.orientation, panel_height);
             
             //initiate settings
-            this._bindSettings();
+            this.bindSettings();
             
             //set up panel
             this.setPanelIcon();
@@ -217,9 +216,9 @@ MyApplet.prototype = {
             this.recentManager = new Gtk.RecentManager();
             
             //listen for changes
-            this.appSys.connect("installed-changed", Lang.bind(this, this._build_launchers_section));
-            dirMonitor.connect("changed", Lang.bind(this, this._build_documents_section));
-            this.recentManager.connect("changed", Lang.bind(this, this._build_recent_documents_section));
+            this.appSys.connect("installed-changed", Lang.bind(this, this.buildLaunchersSection));
+            dirMonitor.connect("changed", Lang.bind(this, this.buildDocumentsSection));
+            this.recentManager.connect("changed", Lang.bind(this, this.buildRecentDocumentsSection));
             
             this.buildMenu();
             
@@ -240,22 +239,22 @@ MyApplet.prototype = {
         this.menu.open();
     },
     
-    _bindSettings: function() {
+    bindSettings: function() {
         this.settings = new Settings.AppletSettings(this, this.metadata["uuid"], this.instanceId);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelIcon", "panelIcon", this.setPanelIcon);
         this.settings.bindProperty(Settings.BindingDirection.IN, "symbolicPanelIcon", "symbolicPanelIcon", this.setPanelIcon);
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelText", "panelText", this.setPanelText);
         this.settings.bindProperty(Settings.BindingDirection.IN, "iconSize", "iconSize", this.buildMenu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showDocuments", "showDocuments", this.buildMenu);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "altDir", "altDir", this._build_documents_section);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "recurseDocuments", "recurseDocuments", this._build_documents_section);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "altDir", "altDir", this.buildDocumentsSection);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "recurseDocuments", "recurseDocuments", this.buildDocumentsSection);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showRecentDocuments", "showRecentDocuments", this.buildMenu);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "recentSizeLimit", "recentSizeLimit", this._build_recent_documents_section);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "keyOpen", "keyOpen", this._setKeybinding);
-        this._setKeybinding();
+        this.settings.bindProperty(Settings.BindingDirection.IN, "recentSizeLimit", "recentSizeLimit", this.buildRecentDocumentsSection);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "keyOpen", "keyOpen", this.setKeybinding);
+        this.setKeybinding();
     },
     
-    _setKeybinding: function() {
+    setKeybinding: function() {
         if ( this.keyId ) Main.keybindingManager.removeHotKey(this.keyId);
         if ( this.keyOpen == "" ) return;
         this.keyId = "officeCenter-open";
@@ -285,7 +284,7 @@ MyApplet.prototype = {
             launchersPane.addMenuItem(this.launchersSection);
             
             mainBox.add_actor(launchersPane.actor, { span: 1 });
-            this._build_launchers_section();
+            this.buildLaunchersSection();
             
             let paddingBox = new St.BoxLayout();
             paddingBox.set_width(MENU_PADDING_WIDTH);
@@ -320,7 +319,7 @@ MyApplet.prototype = {
                 this.documentSection = new PopupMenu.PopupMenuSection();
                 documentScrollBox.add_actor(this.documentSection.actor);
                 
-                this._build_documents_section();
+                this.buildDocumentsSection();
                 
                 let paddingBox = new St.BoxLayout();
                 paddingBox.set_width(MENU_PADDING_WIDTH);
@@ -350,7 +349,7 @@ MyApplet.prototype = {
                 let clearRecent = new ClearRecentMenuItem(this.menu, this.recentManager);
                 recentPane.addMenuItem(clearRecent);
                 
-                this._build_recent_documents_section();
+                this.buildRecentDocumentsSection();
                 
             }
             
@@ -359,7 +358,7 @@ MyApplet.prototype = {
         }
     },
     
-    _build_launchers_section: function() {
+    buildLaunchersSection: function() {
         
         this.launchersSection.removeAll();
         
@@ -389,14 +388,14 @@ MyApplet.prototype = {
         
     },
     
-    _build_documents_section: function() {
+    buildDocumentsSection: function() {
         
         this.documentSection.removeAll();
         
         if ( this.altDir == "" ) this.documentPath = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS);
         else this.documentPath = this.altDir;
         let dir = Gio.file_new_for_path(this.documentPath);
-        let documents = this._get_documents(dir);
+        let documents = this.getDocuments(dir);
         for ( let i = 0; i < documents.length; i++ ) {
             let document = documents[i];
             let documentItem = new DocumentMenuItem(this.menu, document);
@@ -405,7 +404,7 @@ MyApplet.prototype = {
         
     },
     
-    _get_documents: function(dir) {
+    getDocuments: function(dir) {
         
         let documents = [];
         let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
@@ -415,7 +414,7 @@ MyApplet.prototype = {
             if ( info.get_is_hidden() ) continue;
             if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
                 let childDir = dir.get_child(info.get_name());
-                documents = documents.concat(this._get_documents(childDir));
+                documents = documents.concat(this.getDocuments(childDir));
             }
             else documents.push(dir.get_child(info.get_name()));
         }
@@ -423,7 +422,7 @@ MyApplet.prototype = {
         
     },
     
-    _build_recent_documents_section: function() {
+    buildRecentDocumentsSection: function() {
         
         if ( !this.showRecentDocuments ) return;
         this.recentSection.removeAll();
