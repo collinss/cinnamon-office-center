@@ -6,14 +6,14 @@
     
     "panelIcon": {
         "type": "iconfilechooser",
-        "description": "Panel Icon",
+        "description": "Panel icon",
         "default": "applications-office",
         "tooltip": "Accepts icon name or direct path (supports symbolic icons)"
     },
     
     "panelText": {
         "type": "entry",
-        "description": "Panel Text",
+        "description": "Panel text",
         "default": ""
     },
     
@@ -30,7 +30,7 @@
         "max": 50,
         "units": "px",
         "step": 2,
-        "description": "Icon Size"
+        "description": "Icon size"
     },
     
     "documents": {
@@ -40,13 +40,13 @@
     
     "showDocuments": {
         "type": "checkbox",
-        "description": "Show Documents Section",
+        "description": "Show contents of documents folder",
         "default": true
     },
     
     "recurseDocuments": {
         "type": "checkbox",
-        "description": "Show contents of subfolders",
+        "description": "Include subfolders",
         "default": true,
         "indent": true,
         "dependency": "showDocuments"
@@ -54,7 +54,7 @@
     
     "altDir": {
         "type": "filechooser",
-        "description": "Alternate directory",
+        "description": "Use alternate directory",
         "default": "",
         "select-dir": true,
         "indent": true,
@@ -68,7 +68,7 @@
     
     "showRecentDocuments": {
         "type": "checkbox",
-        "description": "Show Recent Documents Section",
+        "description": "Show recent documents",
         "default": false
     },
     
