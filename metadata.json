@@ -5,6 +5,6 @@
     "comments": "Office Center is a feature-rich, cross-platform Cinnamon applet that provides easy aceess to all of your office programs and documents. Feel free to contribute by submitting pull requests, bug reports and feature requests to my github repo.",
     "icon": "applications-office",
     "website": "https://github.com/collinss/cinnamon-office-center",
-    "version": "2.0",
+    "version": "2.0.1",
     "contributors": "Stephen Collins - Author"
 }

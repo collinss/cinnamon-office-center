@@ -1,4 +1,4 @@
-Places Center is a feature-rich, cross-platform Cinnamon applet that provides easy aceess to all of your most-used places. Feel free to contribute by submitting pull requests, bug reports and feature requests.
+Office Center is a feature-rich, cross-platform Cinnamon applet that provides easy aceess to all of your office programs and documents. Feel free to contribute by submitting pull requests, bug reports and feature requests.
 
 To do before next release
 -------------------------
