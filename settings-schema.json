@@ -82,5 +82,11 @@
         "description": "Number to show",
         "indent": true,
         "dependency": "showRecentDocuments"
+    },
+    
+    "mimeFilter": {
+        "type": "entry",
+        "description": "Filter by MIME type",
+        "default": "application/x-abiword,application/pdf,"
     }
 }

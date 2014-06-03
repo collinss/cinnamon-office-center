@@ -334,7 +334,7 @@ MyApplet.prototype = {
             this.recentManager = new Gtk.RecentManager();
             
             //listen for changes
-            this.appSysId = this.appSys.connect("installed-changed", Lang.bind(this, this.buildLaunchersSection));
+            this.appSysId = this.appSys.connect("installed-changed", Lang.bind(this, this.updateLaunchersSection));
             
             this.buildMenu();
             
@@ -371,6 +371,7 @@ MyApplet.prototype = {
         this.settings.bindProperty(Settings.BindingDirection.IN, "recurseDocuments", "recurseDocuments", this.updateDocumentsSection);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showRecentDocuments", "showRecentDocuments", this.buildMenu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "recentSizeLimit", "recentSizeLimit", this.updateRecentDocumentsSection);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "mimeFilter", "mimeFilter", this.updateRecentDocumentsSection);
         this.settings.bindProperty(Settings.BindingDirection.IN, "keyOpen", "keyOpen", this.setKeybinding);
         this.setKeybinding();
     },
@@ -409,7 +410,7 @@ MyApplet.prototype = {
             this.launchersSection = new PopupMenu.PopupMenuSection();
             launchersPane.addMenuItem(this.launchersSection);
             
-            this.buildLaunchersSection();
+            this.updateLaunchersSection();
             
             //documents section
             if ( this.showDocuments ) {
@@ -499,7 +500,7 @@ MyApplet.prototype = {
         if ( this.menu ) this.menu.destroy();
     },
     
-    buildLaunchersSection: function() {
+    updateLaunchersSection: function() {
         
         this.launchersSection.removeAll();
         
@@ -516,7 +517,7 @@ MyApplet.prototype = {
                     while (( nextType = dirIter.next()) != GMenu.TreeItemType.INVALID ) {
                         if ( nextType == GMenu.TreeItemType.ENTRY ) {
                             let entry = dirIter.get_entry();
-                            if (!entry.get_app_info().get_nodisplay()) {
+                            if ( !entry.get_app_info().get_nodisplay() ) {
                                 var app = this.appSys.lookup_app_by_tree_entry(entry);
                                 let launcherItem = new LauncherMenuItem(app);
                                 this.launchersSection.addMenuItem(launcherItem);
@@ -568,6 +569,7 @@ MyApplet.prototype = {
         this.recentSection.removeAll();
         
         let recentDocuments = this.recentManager.get_items();
+        let filter = this.mimeFilter.replace(" ", "").split(",");
         
         let showCount;
         if ( this.recentSizeLimit == 0 ) showCount = recentDocuments.length;
@@ -575,8 +577,12 @@ MyApplet.prototype = {
         for ( let i = 0; i < showCount; i++ ) {
             let recentInfo = recentDocuments[i];
             let mimeType = recentInfo.get_mime_type().replace("\/","-");
-            let recentItem = new RecentMenuItem(recentInfo.get_display_name(), mimeType, recentInfo.get_uri());
-            this.recentSection.addMenuItem(recentItem);
+            
+global.log(mimeType);
+            if ( this.mimeFilter == "" || this.mimeFilter.search(mimeType) >= 0 ) {
+                let recentItem = new RecentMenuItem(recentInfo.get_display_name(), mimeType, recentInfo.get_uri());
+                this.recentSection.addMenuItem(recentItem);
+            }
         }
         
     },
