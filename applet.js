@@ -1,7 +1,7 @@
 const Cinnamon = imports.gi.Cinnamon;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
-const GMenu = imports.gi.GMenu;
+const CMenu = imports.gi.CMenu;
 const Gtk = imports.gi.Gtk;
 const Pango = imports.gi.Pango;
 const St = imports.gi.St;
@@ -508,13 +508,13 @@ MyApplet.prototype = {
         let root = tree.get_root_directory();
         let iter = root.iter();
         let nextType;
-        while ( (nextType = iter.next()) != GMenu.TreeItemType.INVALID ) {
-            if ( nextType == GMenu.TreeItemType.DIRECTORY ) {
+        while ( (nextType = iter.next()) != CMenu.TreeItemType.INVALID ) {
+            if ( nextType == CMenu.TreeItemType.DIRECTORY ) {
                 let dir = iter.get_directory();
                 if ( dir.get_menu_id() == _("Office") ) {
                     let dirIter = dir.iter();
-                    while (( nextType = dirIter.next()) != GMenu.TreeItemType.INVALID ) {
-                        if ( nextType == GMenu.TreeItemType.ENTRY ) {
+                    while (( nextType = dirIter.next()) != CMenu.TreeItemType.INVALID ) {
+                        if ( nextType == CMenu.TreeItemType.ENTRY ) {
                             let entry = dirIter.get_entry();
                             if (!entry.get_app_info().get_nodisplay()) {
                                 var app = this.appSys.lookup_app_by_tree_entry(entry);
