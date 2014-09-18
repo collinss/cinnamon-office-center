@@ -530,36 +530,35 @@ MyApplet.prototype = {
     },
     
     updateDocumentsSection: function() {
-        
         if ( !this.documentSection ) return;
         this.documentSection.removeAll();
         
         let dir = Gio.file_new_for_path(this.documentPath);
-        let documents = this.getDocuments(dir);
-        for ( let i = 0; i < documents.length; i++ ) {
-            let document = documents[i];
-            let documentItem = new DocumentMenuItem(document);
-            this.documentSection.addMenuItem(documentItem);
-        }
-        
+        this.getDocuments(dir);
     },
     
     getDocuments: function(dir) {
-        
-        let documents = [];
-        let gEnum = dir.enumerate_children("*", Gio.FileQueryInfoFlags.NONE, null);
-        
-        let info;
-        while ( (info = gEnum.next_file(null)) != null ) {
-            if ( info.get_is_hidden() ) continue;
-            if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
-                let childDir = dir.get_child(info.get_name());
-                documents = documents.concat(this.getDocuments(childDir));
+        dir.enumerate_children_async("*", Gio.FileQueryInfoFlags.NONE, 0, null, Lang.bind(this, function(dir, res) {
+            let gEnum = dir.enumerate_children_finish(res);
+            
+            let info;
+            let directories = [];
+            while ( (info = gEnum.next_file(null)) != null ) {
+                if ( info.get_is_hidden() ) continue;
+                if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
+                    directories.push(dir.get_child(info.get_name()));
+                }
+                else {
+                    let documentItem = new DocumentMenuItem(dir.get_child(info.get_name()));
+                    this.documentSection.addMenuItem(documentItem);
+                }
             }
-            else documents.push(dir.get_child(info.get_name()));
-        }
-        return documents;
-        
+            gEnum.close(null);
+            
+            for ( let i = 0; i < directories.length; i++ ) {
+                this.getDocuments(directories[i]);
+            }
+        }));
     },
     
     updateRecentDocumentsSection: function() {
