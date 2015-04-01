@@ -19,17 +19,17 @@ const MENU_ITEM_TEXT_LENGTH = 25;
 let menu_item_icon_size;
 
 
-function MenuItem(title, icon){
-    this._init(title, icon);
+function MenuItem(title, icon, tooltip){
+    this._init(title, icon, tooltip);
 }
 
 MenuItem.prototype = {
     __proto__: PopupMenu.PopupBaseMenuItem.prototype,
     
-    _init: function(title, icon, params){
+    _init: function(title, icon, tooltipText){
         try {
             
-            PopupMenu.PopupBaseMenuItem.prototype._init.call(this, params);
+            PopupMenu.PopupBaseMenuItem.prototype._init.call(this);
             this.actor.add_style_class_name("xCenter-menuItem");
             if ( icon != null ) this.addActor(icon);
             
@@ -39,7 +39,8 @@ MenuItem.prototype = {
             
             this.actor._delegate = this;
             
-            let tooltip = new Tooltips.Tooltip(this.actor, title);
+            if ( !tooltipText ) tooltipText = title;
+            let tooltip = new Tooltips.Tooltip(this.actor, tooltipText);
             
             this.connect("activate", Lang.bind(this, this.launch));
             
@@ -97,7 +98,7 @@ DocumentMenuItem.prototype = {
             this.uri = file.get_uri();
             
             let icon = fileInfo.get_icon();
-            MenuItem.prototype._init.call(this, fileInfo.get_name(), St.TextureCache.get_default().load_gicon(null, icon, menu_item_icon_size));
+            MenuItem.prototype._init.call(this, fileInfo.get_name(), St.TextureCache.get_default().load_gicon(null, icon, menu_item_icon_size), file.get_path());
             
         } catch(e) {
             global.logError(e);
@@ -284,48 +285,38 @@ MyApplet.prototype = {
             
             //documents section
             if ( this.showDocuments ) {
-                //determine directory
-                if ( this.altDir == "" ) this.documentPath = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS);
-                else this.documentPath = this.altDir;
+                let documentPaneBox = new St.BoxLayout({ style_class: "xCenter-pane" });
+                mainBox.add_actor(documentPaneBox);
+                let documentPane = new PopupMenu.PopupMenuSection();
+                documentPaneBox.add_actor(documentPane.actor);
+                this.menu._connectSubMenuSignals(documentPane, documentPane);
                 
-                //if directory exists, build documents section
-                if ( this.documentPath && GLib.file_test(this.documentPath, GLib.FileTest.IS_DIR) ) {
-                    this.dirMonitor = Gio.file_new_for_path(this.documentPath).monitor_directory(Gio.FileMonitorFlags.SEND_MOVED, null);
-                    this.monitorId = this.dirMonitor.connect("changed", Lang.bind(this, this.updateDocumentsSection));
-                    
-                    let documentPaneBox = new St.BoxLayout({ style_class: "xCenter-pane" });
-                    mainBox.add_actor(documentPaneBox);
-                    let documentPane = new PopupMenu.PopupMenuSection();
-                    documentPaneBox.add_actor(documentPane.actor);
-                    this.menu._connectSubMenuSignals(documentPane, documentPane);
-                    
-                    let documentTitle = new PopupMenu.PopupBaseMenuItem({ style_class: "xCenter-title", reactive: false });
-                    documentTitle.addActor(new St.Label({ text: _("DOCUMENTS") }));
-                    documentPane.addMenuItem(documentTitle);
-                    
-                    //add link to documents folder
-                    let linkButton = new St.Button();
-                    documentTitle.addActor(linkButton);
-                    let file = Gio.file_new_for_path(this.metadata.path + "/link-symbolic.svg");
-                    let gicon = new Gio.FileIcon({ file: file });
-                    let image = new St.Icon({ gicon: gicon, icon_size: 10, icon_type: St.IconType.SYMBOLIC });
-                    linkButton.add_actor(image);
-                    linkButton.connect("clicked", Lang.bind(this, this.openDocumentsFolder));
-                    new Tooltips.Tooltip(linkButton, _("Open folder"));
-                    
-                    let documentScrollBox = new St.ScrollView({ style_class: "xCenter-scrollBox", x_fill: true, y_fill: false, y_align: St.Align.START });
-                    documentPane.actor.add_actor(documentScrollBox);
-                    documentScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-                    let vscroll = documentScrollBox.get_vscroll_bar();
-                    vscroll.connect("scroll-start", Lang.bind(this, function() { this.menu.passEvents = true; }));
-                    vscroll.connect("scroll-stop", Lang.bind(this, function() { this.menu.passEvents = false; }));
-                    
-                    this.documentSection = new PopupMenu.PopupMenuSection();
-                    documentScrollBox.add_actor(this.documentSection.actor);
-                    documentPane._connectSubMenuSignals(this.documentSection, this.documentSection);
-                    
-                    this.updateDocumentsSection();
-                }
+                let documentTitle = new PopupMenu.PopupBaseMenuItem({ style_class: "xCenter-title", reactive: false });
+                documentTitle.addActor(new St.Label({ text: _("DOCUMENTS") }));
+                documentPane.addMenuItem(documentTitle);
+                
+                //add link to documents folder
+                let linkButton = new St.Button();
+                documentTitle.addActor(linkButton);
+                let file = Gio.file_new_for_path(this.metadata.path + "/link-symbolic.svg");
+                let gicon = new Gio.FileIcon({ file: file });
+                let image = new St.Icon({ gicon: gicon, icon_size: 10, icon_type: St.IconType.SYMBOLIC });
+                linkButton.add_actor(image);
+                linkButton.connect("clicked", Lang.bind(this, this.openDocumentsFolder));
+                new Tooltips.Tooltip(linkButton, _("Open folder"));
+                
+                let documentScrollBox = new St.ScrollView({ style_class: "xCenter-scrollBox", x_fill: true, y_fill: false, y_align: St.Align.START });
+                documentPane.actor.add_actor(documentScrollBox);
+                documentScrollBox.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+                let vscroll = documentScrollBox.get_vscroll_bar();
+                vscroll.connect("scroll-start", Lang.bind(this, function() { this.menu.passEvents = true; }));
+                vscroll.connect("scroll-stop", Lang.bind(this, function() { this.menu.passEvents = false; }));
+                
+                this.documentSection = new PopupMenu.PopupMenuSection();
+                documentScrollBox.add_actor(this.documentSection.actor);
+                documentPane._connectSubMenuSignals(this.documentSection, this.documentSection);
+                
+                this.updateDocumentsSection();
             }
             
             //recent documents section
@@ -401,13 +392,26 @@ MyApplet.prototype = {
     },
     
     updateDocumentsSection: function() {
+        if ( this.dirMonitor && this.monitorId ) {
+            this.dirMonitor.disconnect(this.monitorId);
+            this.dirMonitor = undefined;
+            this.monitorId = undefined;
+        }
         if ( !this.documentSection ) return;
         this.documentSection.removeAll();
+        
+        //determine directory
+        if ( this.altDir && GLib.file_test(this.altDir, GLib.FileTest.IS_DIR) ) this.documentPath = this.altDir;
+        else this.documentPath = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS);
         
         this.documentCount = 0;
         
         let dir = Gio.file_new_for_path(this.documentPath);
+        
         this.getDocuments(dir);
+        
+        this.dirMonitor = dir.monitor_directory(Gio.FileMonitorFlags.SEND_MOVED, null);
+        this.monitorId = this.dirMonitor.connect("changed", Lang.bind(this, this.updateDocumentsSection));
     },
     
     getDocuments: function(dir) {
