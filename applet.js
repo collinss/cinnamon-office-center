@@ -237,8 +237,9 @@ MyApplet.prototype = {
         this.settings.bindProperty(Settings.BindingDirection.IN, "panelText", "panelText", this.setPanelText);
         this.settings.bindProperty(Settings.BindingDirection.IN, "iconSize", "iconSize", this.buildMenu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showDocuments", "showDocuments", this.buildMenu);
-        this.settings.bindProperty(Settings.BindingDirection.IN, "altDir", "altDir", this.buildMenu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "recurseDocuments", "recurseDocuments", this.updateDocumentsSection);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "altDir", "altDir", this.updateDocumentsSection);
+        this.settings.bindProperty(Settings.BindingDirection.IN, "docMax", "docMax", this.updateDocumentsSection);
         this.settings.bindProperty(Settings.BindingDirection.IN, "showRecentDocuments", "showRecentDocuments", this.buildMenu);
         this.settings.bindProperty(Settings.BindingDirection.IN, "recentSizeLimit", "recentSizeLimit", this.updateRecentDocumentsSection);
         this.settings.bindProperty(Settings.BindingDirection.IN, "keyOpen", "keyOpen", this.setKeybinding);
@@ -403,32 +404,39 @@ MyApplet.prototype = {
         if ( !this.documentSection ) return;
         this.documentSection.removeAll();
         
+        this.documentCount = 0;
+        
         let dir = Gio.file_new_for_path(this.documentPath);
         this.getDocuments(dir);
     },
     
     getDocuments: function(dir) {
-        dir.enumerate_children_async("*", Gio.FileQueryInfoFlags.NONE, 0, null, Lang.bind(this, function(dir, res) {
-            let gEnum = dir.enumerate_children_finish(res);
-            
-            let info;
-            let directories = [];
-            while ( (info = gEnum.next_file(null)) != null ) {
-                if ( info.get_is_hidden() ) continue;
-                if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
-                    directories.push(dir.get_child(info.get_name()));
-                }
-                else {
-                    let documentItem = new DocumentMenuItem(dir.get_child(info.get_name()));
-                    this.documentSection.addMenuItem(documentItem);
-                }
+        if ( this.documentCount >= this.docMax ) return;
+        dir.enumerate_children_async("*", Gio.FileQueryInfoFlags.NONE, 0, null, Lang.bind(this, this.processDocuments));
+    },
+    
+    processDocuments: function(dir, res) {
+        let gEnum = dir.enumerate_children_finish(res);
+        
+        let info;
+        let directories = [];
+        while ( (info = gEnum.next_file(null)) != null ) {
+        if ( this.documentCount >= this.docMax ) break;
+            if ( info.get_is_hidden() ) continue;
+            if ( info.get_file_type() == Gio.FileType.DIRECTORY && this.recurseDocuments ) {
+                directories.push(dir.get_child(info.get_name()));
             }
-            gEnum.close(null);
-            
-            for ( let i = 0; i < directories.length; i++ ) {
-                this.getDocuments(directories[i]);
+            else {
+                let documentItem = new DocumentMenuItem(dir.get_child(info.get_name()));
+                this.documentSection.addMenuItem(documentItem);
+                this.documentCount++;
             }
-        }));
+        }
+        gEnum.close(null);
+        
+        for ( let i = 0; i < directories.length; i++ ) {
+            this.getDocuments(directories[i]);
+        }
     },
     
     updateRecentDocumentsSection: function() {
